@@ -23,7 +23,7 @@ jobs:
         run: |
           DATE=$(date -u +"%Y%m%dT%H%M%S")
           HASH=$(git rev-parse --short HEAD)
-          VERSION="v${DATE}_${HASH}"
+          VERSION="v${DATE}-${HASH}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup Node 20
