@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build api-provider
+        run: cd modules/api-provider && npm install && npm run build
+
       - name: Build
         run: npm run build
 
