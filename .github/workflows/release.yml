@@ -18,13 +18,28 @@ jobs:
           fetch-depth: 0
           submodules: 'true'
 
-      - name: Generate version
+      - name: Read version from manifest.json
         id: version
         run: |
-          DATE=$(date -u +"%Y%m%dT%H%M%S")
-          HASH=$(git rev-parse --short HEAD)
-          VERSION="v${DATE}-${HASH}"
+          VERSION=$(jq -r '.version' manifest.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if release already exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Checking if release '$VERSION' already exists..."
+          if gh release view "$VERSION" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            echo "::warning title=Release Skipped::Version '$VERSION' already exists on GitHub Releases. Please bump the version in manifest.json before releasing."
+            echo ""
+            echo "=========================================="
+            echo "  WARNING: Release '$VERSION' already exists."
+            echo "  Please update the version field in manifest.json."
+            echo "=========================================="
+            exit 1
+          fi
+          echo "Release '$VERSION' not found. Proceeding with release..."
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
